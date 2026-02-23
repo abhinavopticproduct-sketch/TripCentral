@@ -3,3 +3,4 @@
 .env
 .env.local
 prisma/dev.db
+.vercel
