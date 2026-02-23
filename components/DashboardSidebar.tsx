@@ -28,7 +28,7 @@ export function DashboardSidebar() {
           <Link href="/dashboard" className="flex items-center gap-2 rounded-xl px-3 py-2 hover:bg-slate-50" onClick={() => setOpen(false)}>
             <Wallet size={16} /> Trips
           </Link>
-          <Link href="/dashboard" className="flex items-center gap-2 rounded-xl px-3 py-2 hover:bg-slate-50" onClick={() => setOpen(false)}>
+          <Link href="/dashboard/planner" className="flex items-center gap-2 rounded-xl px-3 py-2 hover:bg-slate-50" onClick={() => setOpen(false)}>
             <MapPinned size={16} /> Planner
           </Link>
         </nav>
