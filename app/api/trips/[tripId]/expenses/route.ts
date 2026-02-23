@@ -35,8 +35,26 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const ratesPayload = await getExchangeRates(trip.baseCurrency);
-  const amountBase = convertToBase(parsed.data.amount, parsed.data.currency, trip.baseCurrency, ratesPayload.rates);
+  const sourceCurrency = parsed.data.currency.toUpperCase();
+  const baseCurrency = trip.baseCurrency.toUpperCase();
+  let amountBase = parsed.data.amount;
+  let note: string | null = null;
+
+  if (sourceCurrency !== baseCurrency) {
+    try {
+      const ratesPayload = await getExchangeRates(baseCurrency);
+      amountBase = convertToBase(parsed.data.amount, sourceCurrency, baseCurrency, ratesPayload.rates);
+    } catch {
+      // Keep the app operational if external rate providers are slow/unavailable.
+      amountBase = parsed.data.amount;
+      note = "Live conversion unavailable. Stored with 1:1 fallback.";
+    }
+  }
+
+  const expenseDate = new Date(parsed.data.date);
+  if (Number.isNaN(expenseDate.getTime())) {
+    return NextResponse.json({ error: "Invalid expense date." }, { status: 400 });
+  }
 
   const expense = await prisma.expense.create({
     data: {
@@ -44,11 +62,11 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
       title: parsed.data.title,
       category: parsed.data.category,
       amountOriginal: parsed.data.amount,
-      currencyOriginal: parsed.data.currency.toUpperCase(),
+      currencyOriginal: sourceCurrency,
       amountBase,
-      date: new Date(parsed.data.date)
+      date: expenseDate
     }
   });
 
-  return NextResponse.json({ expense, convertedTo: trip.baseCurrency }, { status: 201 });
+  return NextResponse.json({ expense, convertedTo: trip.baseCurrency, note }, { status: 201 });
 }

@@ -12,16 +12,39 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
 
   const url = new URL(req.url);
   const to = (url.searchParams.get("to") || "USD").toUpperCase();
+  const from = trip.baseCurrency.toUpperCase();
 
-  const rates = await getExchangeRates(trip.baseCurrency);
-  if (!rates.rates[to]) {
-    return NextResponse.json({ error: "Unsupported target currency" }, { status: 400 });
+  if (to === from) {
+    return NextResponse.json({
+      from,
+      to,
+      rate: 1,
+      timestamp: new Date().toISOString()
+    });
   }
 
-  return NextResponse.json({
-    from: trip.baseCurrency,
-    to,
-    rate: rates.rates[to],
-    timestamp: rates.timestamp
-  });
+  try {
+    const rates = await getExchangeRates(from);
+    if (!rates.rates[to]) {
+      return NextResponse.json({ error: "Unsupported target currency" }, { status: 400 });
+    }
+
+    return NextResponse.json({
+      from,
+      to,
+      rate: rates.rates[to],
+      timestamp: rates.timestamp
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        from,
+        to,
+        rate: 1,
+        timestamp: new Date().toISOString(),
+        note: "Live rates unavailable, showing 1:1 fallback."
+      },
+      { status: 200 }
+    );
+  }
 }
