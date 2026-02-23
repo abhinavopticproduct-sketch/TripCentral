@@ -134,6 +134,13 @@ export function ExpensesTableClient({
           </tr>
         </thead>
         <tbody>
+          {expenses.length === 0 ? (
+            <tr>
+              <td className="py-4 text-slate-500" colSpan={6}>
+                No expenses added yet.
+              </td>
+            </tr>
+          ) : null}
           {expenses.map((expense) => {
             const editing = editingId === expense.id && editState;
             const busy = loadingId === expense.id;

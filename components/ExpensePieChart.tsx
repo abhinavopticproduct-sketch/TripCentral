@@ -5,6 +5,17 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 const COLORS = ["#4F46E5", "#0EA5E9", "#22C55E", "#F59E0B", "#EF4444"];
 
 export function ExpensePieChart({ data }: { data: Array<{ name: string; value: number }> }) {
+  if (data.length === 0) {
+    return (
+      <div className="card h-72 p-4">
+        <p className="mb-2 text-sm font-medium">Expenses by Category</p>
+        <div className="flex h-[85%] items-center justify-center text-sm text-slate-500">
+          No expense data yet.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card h-72 p-4">
       <p className="mb-2 text-sm font-medium">Expenses by Category</p>

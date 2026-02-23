@@ -19,8 +19,18 @@ export default async function TripExpensesPage({ params }: { params: { tripId: s
 
   if (!trip) notFound();
 
-  const totalExpenses = trip.expenses.reduce((sum, exp) => sum + exp.amountBase, 0);
-  const grouped = trip.expenses.reduce<Record<string, number>>((acc, exp) => {
+  const expenseRows = trip.expenses.map((expense) => ({
+    id: expense.id,
+    title: expense.title,
+    category: expense.category,
+    amountOriginal: Number(expense.amountOriginal ?? 0),
+    currencyOriginal: expense.currencyOriginal,
+    amountBase: Number(expense.amountBase ?? 0),
+    date: expense.date.toISOString()
+  }));
+
+  const totalExpenses = expenseRows.reduce((sum, exp) => sum + exp.amountBase, 0);
+  const grouped = expenseRows.reduce<Record<string, number>>((acc, exp) => {
     acc[exp.category] = (acc[exp.category] ?? 0) + exp.amountBase;
     return acc;
   }, {});
@@ -39,15 +49,7 @@ export default async function TripExpensesPage({ params }: { params: { tripId: s
       <ExpensesTableClient
         tripId={trip.id}
         baseCurrency={trip.baseCurrency}
-        expenses={trip.expenses.map((expense) => ({
-          id: expense.id,
-          title: expense.title,
-          category: expense.category,
-          amountOriginal: expense.amountOriginal,
-          currencyOriginal: expense.currencyOriginal,
-          amountBase: expense.amountBase,
-          date: expense.date.toISOString()
-        }))}
+        expenses={expenseRows}
       />
     </div>
   );
