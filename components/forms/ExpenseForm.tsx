@@ -27,6 +27,8 @@ export function ExpenseForm({ tripId, baseCurrency }: { tripId: string; baseCurr
       date: String(formData.get("date") ?? new Date().toISOString())
     };
 
+    let created = false;
+
     try {
       const res = await fetch(`/api/trips/${tripId}/expenses`, {
         method: "POST",
@@ -37,8 +39,7 @@ export function ExpenseForm({ tripId, baseCurrency }: { tripId: string; baseCurr
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data.error || "Failed to save expense");
-        setLoading(false);
+        setError(typeof data.error === "string" ? data.error : "Failed to save expense");
         return;
       }
 
@@ -49,12 +50,16 @@ export function ExpenseForm({ tripId, baseCurrency }: { tripId: string; baseCurr
       e.currentTarget.reset();
       const dateInput = e.currentTarget.querySelector("input[name='date']") as HTMLInputElement | null;
       if (dateInput) dateInput.value = today;
+      created = true;
     } catch {
       setError("Network error while saving expense.");
     } finally {
       setLoading(false);
     }
-    router.refresh();
+
+    if (created) {
+      router.refresh();
+    }
   }
 
   return (

@@ -35,6 +35,18 @@ export const expenseSchema = z.object({
   date: z.string()
 });
 
+export const expenseUpdateSchema = z
+  .object({
+    title: z.string().min(2).optional(),
+    category: z.enum(["FOOD", "TRANSPORT", "HOTEL", "ACTIVITIES", "OTHER"]).optional(),
+    amount: z.coerce.number().positive().optional(),
+    currency: z.string().min(3).max(3).optional(),
+    date: z.string().optional()
+  })
+  .refine((data) => Object.values(data).some((value) => value !== undefined), {
+    message: "At least one field must be provided."
+  });
+
 export const packingItemSchema = z.object({
   name: z.string().min(1)
 });

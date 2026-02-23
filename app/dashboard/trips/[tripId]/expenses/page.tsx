@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthSession } from "@/lib/auth";
 import { TripTabs } from "@/components/TripTabs";
 import { ExpenseForm } from "@/components/forms/ExpenseForm";
+import { ExpensesTableClient } from "@/components/forms/ExpensesTableClient";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 import { ExpensePieChart } from "@/components/ExpensePieChart";
 import { BudgetSummary } from "@/components/BudgetSummary";
@@ -35,30 +36,19 @@ export default async function TripExpensesPage({ params }: { params: { tripId: s
 
       <ExpensePieChart data={Object.entries(grouped).map(([name, value]) => ({ name, value }))} />
 
-      <div className="card overflow-x-auto p-4">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 text-slate-600">
-              <th className="pb-2">Title</th>
-              <th className="pb-2">Category</th>
-              <th className="pb-2">Original</th>
-              <th className="pb-2">Base ({trip.baseCurrency})</th>
-              <th className="pb-2">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trip.expenses.map((expense) => (
-              <tr key={expense.id} className="border-b border-slate-100">
-                <td className="py-2">{expense.title}</td>
-                <td className="py-2">{expense.category}</td>
-                <td className="py-2">{expense.currencyOriginal} {expense.amountOriginal.toFixed(2)}</td>
-                <td className="py-2">{expense.amountBase.toFixed(2)}</td>
-                <td className="py-2">{new Date(expense.date).toLocaleDateString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ExpensesTableClient
+        tripId={trip.id}
+        baseCurrency={trip.baseCurrency}
+        expenses={trip.expenses.map((expense) => ({
+          id: expense.id,
+          title: expense.title,
+          category: expense.category,
+          amountOriginal: expense.amountOriginal,
+          currencyOriginal: expense.currencyOriginal,
+          amountBase: expense.amountBase,
+          date: expense.date.toISOString()
+        }))}
+      />
     </div>
   );
 }
