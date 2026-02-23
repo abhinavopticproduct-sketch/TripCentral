@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+const today = new Date().toISOString().slice(0, 10);
+
 const defaultValues = {
   name: "",
   destinationCity: "",
-  startDate: "",
-  endDate: "",
+  startDate: today,
+  endDate: today,
   totalBudget: "",
   baseCurrency: "USD"
 };
@@ -20,6 +22,21 @@ export function NewTripForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (values.startDate < today) {
+      setError("Start date cannot be before today.");
+      return;
+    }
+
+    if (values.endDate < today) {
+      setError("End date cannot be before today.");
+      return;
+    }
+
+    if (values.endDate < values.startDate) {
+      setError("End date cannot be before start date.");
+      return;
+    }
 
     const res = await fetch("/api/trips", {
       method: "POST",
@@ -49,11 +66,32 @@ export function NewTripForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm">Start Date</label>
-          <input className="input" type="date" value={values.startDate} onChange={(e) => setValues({ ...values, startDate: e.target.value })} required />
+          <input
+            className="input"
+            type="date"
+            min={today}
+            value={values.startDate}
+            onChange={(e) => {
+              const nextStart = e.target.value;
+              setValues((prev) => ({
+                ...prev,
+                startDate: nextStart,
+                endDate: prev.endDate < nextStart ? nextStart : prev.endDate
+              }));
+            }}
+            required
+          />
         </div>
         <div>
           <label className="mb-1 block text-sm">End Date</label>
-          <input className="input" type="date" value={values.endDate} onChange={(e) => setValues({ ...values, endDate: e.target.value })} required />
+          <input
+            className="input"
+            type="date"
+            min={values.startDate || today}
+            value={values.endDate}
+            onChange={(e) => setValues({ ...values, endDate: e.target.value })}
+            required
+          />
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">

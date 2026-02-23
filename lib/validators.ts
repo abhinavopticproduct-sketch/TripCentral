@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const tripSchema = z.object({
+export const tripCreateSchema = z.object({
   name: z.string().min(2),
   destinationCity: z.string().min(2),
   startDate: z.string(),
@@ -8,6 +8,24 @@ export const tripSchema = z.object({
   totalBudget: z.coerce.number().positive(),
   baseCurrency: z.string().min(3).max(3)
 });
+
+export const tripUpdateSchema = z
+  .object({
+    name: z.string().min(2).optional(),
+    destinationCity: z.string().min(2).optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    totalBudget: z.coerce.number().positive().optional(),
+    baseCurrency: z.string().min(3).max(3).optional(),
+    hotelDetails: z.string().optional(),
+    flightDetails: z.string().optional(),
+    notes: z.string().optional()
+  })
+  .refine(
+    (data) =>
+      Object.values(data).some((value) => value !== undefined),
+    { message: "At least one field must be provided." }
+  );
 
 export const expenseSchema = z.object({
   title: z.string().min(2),
