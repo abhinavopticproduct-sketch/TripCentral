@@ -12,7 +12,7 @@ export async function GET(_: Request, { params }: { params: { tripId: string } }
 
   const weather = await getCityWeather(trip.destinationCity);
   if (!weather) {
-    return NextResponse.json({ error: "Weather unavailable. Configure OPENWEATHER_API_KEY." }, { status: 503 });
+    return NextResponse.json({ error: "Weather data is currently unavailable." }, { status: 503 });
   }
 
   return NextResponse.json(weather);
